@@ -31,7 +31,8 @@ async function run() {
     const database = client.db("hire_loop_db");
     const jobCollection = database.collection("jobs");
     const companyCollection = database.collection("companies");
-    const userCollection=database.collection("user")
+    const userCollection=database.collection("user");
+    const applicationsCollection=database.collection("applications")
 
     //all users
     app.get("/api/user",async(req,res)=>{
@@ -39,13 +40,10 @@ async function run() {
       res.send(result)
     })
 
-    //all companies
-    app.get("/api/companies",async(req,res)=>{
-      const result=await companyCollection.find().toArray();
-      res.send(result)
-    })
+    
 
 
+    //jobs
     app.get("/api/jobs", async (req, res) => {
       const query = {};
       if (req.query.companyId) {
@@ -78,7 +76,42 @@ async function run() {
       res.send(result);
     });
 
+
+
+    //for applications
+    app.get("/api/applications",async(req,res)=>{
+      const query={};
+      if(req.query.jobId){
+        query.jobId=req.query.jobId;
+      }
+        if(req.query.applicantId){ 
+          query.applicantId=req.query.applicantId;
+        }
+      const result=await applicationsCollection.find(query).toArray();
+      res.send(result)
+    })
+
+
+
+    app.post("/api/applications",async(req,res)=>{
+      const application=req.body;
+      const newApplication={
+        ...application,
+        createdAt: new Date()
+      }
+      const result=await applicationsCollection.insertOne(newApplication);
+      res.send(result)
+    })
+
+
+
+
     //for company
+    //all companies
+    app.get("/api/companies",async(req,res)=>{
+      const result=await companyCollection.find().toArray();
+      res.send(result)
+    })
     app.get("/api/my/company", async (req, res) => {
       const query = {};
       if (req.query.recruiterId) {
